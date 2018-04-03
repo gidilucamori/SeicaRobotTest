@@ -120,7 +120,8 @@ namespace Test
 
             public static int Main(String[] args)
             {
-                StartListening();
+                Seica.Robot r = new Seica.Robot("192.168.250.7");
+                //StartListening();
                 return 0;
             }
         }
