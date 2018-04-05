@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Xml.Serialization;
 
 namespace Seica
 {
     public class RobotPoint
     {
+        [XmlArray]
         public List<float> Point { get; set; }
 
         public override string ToString()
@@ -13,7 +15,7 @@ namespace Seica
             string txt = "[";
             foreach (var point in Point)
             {
-                txt += point.ToString("R") +",";
+                txt += point.ToString() +",";
             }
 
             //Tolgo l'ultima virgola
