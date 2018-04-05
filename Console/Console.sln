@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Console\Test.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robot", "Robot\Robot.csproj", "{2B52EA96-CDE5-4722-A80D-6DCCC6694A6A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfTest", "WpfTest\WpfTest.csproj", "{03E120E2-4E5F-4DDC-A6F3-6888384A7E48}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{2B52EA96-CDE5-4722-A80D-6DCCC6694A6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B52EA96-CDE5-4722-A80D-6DCCC6694A6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B52EA96-CDE5-4722-A80D-6DCCC6694A6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03E120E2-4E5F-4DDC-A6F3-6888384A7E48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03E120E2-4E5F-4DDC-A6F3-6888384A7E48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03E120E2-4E5F-4DDC-A6F3-6888384A7E48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03E120E2-4E5F-4DDC-A6F3-6888384A7E48}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -15,81 +15,48 @@ namespace Seica
 {
     public class Robot
     {
+        #region properties
         private IPAddress _ipAddress { get; set; }
+
         // Data buffer for incoming data.  
         private byte[] _bytes = new Byte[1024];
-        private string _data;
+        private string _data { get; set; }
         private IPEndPoint _localEndPoint;
         private Socket _socket;
         private List<RobotPoint> _points { get; set; }
         private Socket _handler;
+
+        //bool per definire se l'istanza è pronta a mandare i comandi al robot, 
+        //ovvero solamente dopo aver scaricato tutte le quote
         public bool AreCommandsEnabled;
+        public bool CommandPending;
 
-        public enum Stazioni
-        {
-            Carico = 1,
-            Scarico = 4,
-            ZonaTest_1 = 2,
-            ZonaTest_2 = 3,
-        }
+        #endregion
 
-        public enum Pinza
-        {
-            Pinza_1 = 1,
-            Pinza_2 = 2
-        }
 
-        public enum Azioni
+        /// <summary>
+        /// Costruttore di classe, 
+        /// </summary>
+        /// <param name="s"></param>
+        public Robot()
         {
-            Prelievo = 1,
-            Deposito = 0
-        }
-
-        public enum PosizioneScheda
-        {
-            Carico_1 = 1,
-            Carico_2 = 2,
-            ZonaTest1_1 = 1,
-            ZonaTest1_2 = 2,
-            ZonaTest1_3 = 3,
-            ZonaTest1_4 = 4,
-            ZonaTest2_1 = 1,
-            ZonaTest2_2 = 2,
-            ZonaTest2_3 = 3,
-            ZonaTest2_4 = 4,
-            Scarico = 1
-        }
-
-        public Robot(string s)
-        {
+            //Imposto la culture info per poter convertire i numeri float in stringa, delimitati dal punto
+            //invece che dalla virgola
             Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
 
+            //Ip definito scaticamente dato che il pc non cambierà mai indirizzo
             _ipAddress = IPAddress.Parse("192.168.250.5");
+            
+            // La porta 40000 è quella che utilizza il robot per stabile una connessione tcp,
+            // Attenzione, Il progemma del robot, esegue il tentativo di connessione solamente al suo inizio
             _localEndPoint = new IPEndPoint(_ipAddress, 40000);
             _socket = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            #region scrittura punti test
-            List<RobotPoint> x = new List<RobotPoint>();
-            //for (int i = 0; i < 22; i++)
-            //{
-            //    x.Add(new RobotPoint()
-            //    {
-            //        Point = new List<float> { i / 2f, i / 2f, i / 2f, i / 2f, i / 2f, i / 2f }
-            //    });
-            //}
-            //_points = x;
-            #endregion
+            //Se non avviene la deseriallizzazione correttamente, l'applicazione viene interrota
+            if(!DeserializePoints()) return;
 
-            //XmlSerialize();
-            DeserializeObject();
-            foreach (var arr in _points)
-            {
-                arr.Point[0] = arr.Point[0] / 1000;
-                arr.Point[1] = arr.Point[1] / 1000;
-                arr.Point[2] = arr.Point[2] / 1000;
-            }
-
-             StartListeningTheRobot();
+            //esegue il binding e fa partire un thread per l'invio dei punti al Robot
+            StartListeningTheRobot();
         }
 
         private void StartListeningTheRobot()
@@ -116,29 +83,44 @@ namespace Seica
             }
         }
 
-        private void DeserializeObject()
+        private bool DeserializePoints()
         {
-            Console.WriteLine("Reading with XmlReader");
+            try
+            {
+                Console.WriteLine("Reading with XmlReader");
 
-            // Create an instance of the XmlSerializer specifying type and namespace.
-            XmlSerializer serializer = new
-            XmlSerializer(typeof(List<RobotPoint>));
+                // Create an instance of the XmlSerializer specifying type and namespace.
+                XmlSerializer serializer = new
+                XmlSerializer(typeof(List<RobotPoint>));
 
-            // A FileStream is needed to read the XML document.
-            FileStream fs = new FileStream("punti.xml", FileMode.Open);
-            XmlReader reader = XmlReader.Create(fs);
+                // A FileStream is needed to read the XML document.
+                FileStream fs = new FileStream("punti.xml", FileMode.Open);
+                XmlReader reader = XmlReader.Create(fs);
 
-            // Use the Deserialize method to restore the object's state.
-            _points = (List<RobotPoint>)serializer.Deserialize(reader);
-            fs.Close();
+                // Use the Deserialize method to restore the object's state.
+                _points = (List<RobotPoint>)serializer.Deserialize(reader);
+
+                //Correzione punti in millimetri, solamente i primi tre parametri di ogni array
+                foreach (var arr in _points)
+                {
+                    arr.Point[0] = arr.Point[0] / 1000;
+                    arr.Point[1] = arr.Point[1] / 1000;
+                    arr.Point[2] = arr.Point[2] / 1000;
+                }
+
+                fs.Close();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Errore deserializzazione punti da foglio xml :" + ex.Message);
+                return false;
+            }
+            
         }
 
         private void RobotListener()
         {
-            while (true)
-            {
-                //Se ho gia eseguito il loop e la scrittura dei punti è gia stata completata
-                if (AreCommandsEnabled) return;
 
                 // Program is suspended while waiting for an incoming connection.
                 Console.WriteLine("Attesa connessioni da clients ...");
@@ -151,9 +133,6 @@ namespace Seica
                 // An incoming connection needs to be processed.  
                 while (!AreCommandsEnabled)
                 {
-                    //Se perdo la connessione torno ad attendere la riapertura del socket
-                    if (!IsRobotConnected(_handler)) return;
-
                     _bytes = new byte[1024];
                     int bytesRec = _handler.Receive(_bytes);
                     _data = null;
@@ -176,7 +155,7 @@ namespace Seica
 
                 }
 
-            }
+            
 
         }
 
@@ -185,8 +164,11 @@ namespace Seica
             throw new NotImplementedException();
         }
 
-        public void WriteCommand(Azioni azione, Pinza pinza, Stazioni stazione , PosizioneScheda pos)
+
+
+        public void WriteCommand(Azioni azione, Pinza pinza, Stazioni stazione, PosizioneScheda pos)
         {
+            CommandPending = true;
             byte[] msg = Encoding.ASCII.GetBytes($"[{(int)azione},{(int)pinza},{(int)stazione},{(int)pos}]");
             _handler.Send(msg);
 
@@ -206,10 +188,13 @@ namespace Seica
                 else if (_data.IndexOf("cmd_end#") > -1)
                 {
                     Console.WriteLine("Comando Completato dal Robot");
+                    CommandPending = false;
                     break;
                 }
             }
         }
+
+
 
         private bool WritePointsToTheRobot(Socket handler)
         {

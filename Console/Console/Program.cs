@@ -9,50 +9,84 @@ namespace Test
         {
             public static void Main(String[] args)
             {
-                Seica.Robot r = new Seica.Robot("192.168.250.7");
+                Seica.Robot r = new Seica.Robot();
 
                 while (!r.AreCommandsEnabled) ;
 
-                r.WriteCommand(Robot.Azioni.Prelievo,
-                               Robot.Pinza.Pinza_1,
-                               Robot.Stazioni.Carico,
-                               Robot.PosizioneScheda.Carico_1);
+                r.WriteCommand(Azioni.Prelievo,
+                               Pinza.Pinza_1,
+                               Stazioni.Carico,
+                               PosizioneScheda.Carico_1);
 
-                r.WriteCommand(Robot.Azioni.Prelievo,
-                               Robot.Pinza.Pinza_2,
-                               Robot.Stazioni.Carico,
-                               Robot.PosizioneScheda.Carico_2);
+                r.WriteCommand(Azioni.Prelievo,
+                               Pinza.Pinza_2,
+                               Stazioni.Carico,
+                               PosizioneScheda.Carico_2);
 
-                r.WriteCommand(Robot.Azioni.Deposito,
-                               Robot.Pinza.Pinza_1,
-                               Robot.Stazioni.ZonaTest_1,
-                               Robot.PosizioneScheda.ZonaTest1_1);
+                r.WriteCommand(Azioni.Deposito,
+                               Pinza.Pinza_1,
+                               Stazioni.ZonaTest_1,
+                               PosizioneScheda.ZonaTest1_1);
 
-                r.WriteCommand(Robot.Azioni.Deposito,
-                               Robot.Pinza.Pinza_2,
-                               Robot.Stazioni.ZonaTest_1,
-                               Robot.PosizioneScheda.ZonaTest1_2);
+                r.WriteCommand(Azioni.Deposito,
+                               Pinza.Pinza_2,
+                               Stazioni.ZonaTest_1,
+                               PosizioneScheda.ZonaTest1_2);
 
-                r.WriteCommand(Robot.Azioni.Prelievo,
-                               Robot.Pinza.Pinza_1,
-                               Robot.Stazioni.ZonaTest_1,
-                               Robot.PosizioneScheda.ZonaTest1_1);
+                r.WriteCommand(Azioni.Prelievo,
+                               Pinza.Pinza_1,
+                               Stazioni.Carico,
+                               PosizioneScheda.Carico_1);
+
+                r.WriteCommand(Azioni.Prelievo,
+                               Pinza.Pinza_2,
+                               Stazioni.Carico,
+                               PosizioneScheda.Carico_2);
+
+                r.WriteCommand(Azioni.Deposito,
+                               Pinza.Pinza_1,
+                               Stazioni.ZonaTest_1,
+                               PosizioneScheda.ZonaTest1_3);
+
+                r.WriteCommand(Azioni.Deposito,
+                               Pinza.Pinza_2,
+                               Stazioni.ZonaTest_1,
+                               PosizioneScheda.ZonaTest1_4);
+
+                //deposito 4 pezzi
+
+                r.WriteCommand(Azioni.Prelievo,
+                               Pinza.Pinza_1,
+                               Stazioni.ZonaTest_1,
+                               PosizioneScheda.ZonaTest1_1);
 
 
-                r.WriteCommand(Robot.Azioni.Prelievo,
-                               Robot.Pinza.Pinza_2,
-                               Robot.Stazioni.ZonaTest_1,
-                               Robot.PosizioneScheda.ZonaTest1_2);
+                r.WriteCommand(Azioni.Prelievo,
+                               Pinza.Pinza_2,
+                               Stazioni.ZonaTest_1,
+                               PosizioneScheda.ZonaTest1_2);
 
-                r.WriteCommand(Robot.Azioni.Deposito,
-                               Robot.Pinza.Pinza_1,
-                               Robot.Stazioni.Scarico,
-                               Robot.PosizioneScheda.Scarico);
+                r.WriteCommand(Azioni.Deposito,
+                               Pinza.Pinza_1,
+                               Stazioni.Scarico,
+                               PosizioneScheda.Scarico);
 
-                r.WriteCommand(Robot.Azioni.Deposito,
-                               Robot.Pinza.Pinza_2,
-                               Robot.Stazioni.Scarico,
-                               Robot.PosizioneScheda.Scarico);
+                r.WriteCommand(Azioni.Deposito,
+                               Pinza.Pinza_2,
+                               Stazioni.Scarico,
+                               PosizioneScheda.Scarico);
+
+ 
+
+                r.WriteCommand(Azioni.Deposito,
+                               Pinza.Pinza_1,
+                               Stazioni.Scarico,
+                               PosizioneScheda.Scarico);
+
+                r.WriteCommand(Azioni.Deposito,
+                               Pinza.Pinza_2,
+                               Stazioni.Scarico,
+                               PosizioneScheda.Scarico);
             }
         }
     }

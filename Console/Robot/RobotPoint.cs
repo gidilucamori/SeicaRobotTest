@@ -21,6 +21,7 @@ namespace Seica
             //Tolgo l'ultima virgola
             txt = txt.Remove(txt.Length-1);
             txt += "]";
+
             return txt;
         }
     }
