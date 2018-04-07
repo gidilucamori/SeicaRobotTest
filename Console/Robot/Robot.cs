@@ -13,6 +13,14 @@ using System.Xml.Serialization;
 
 namespace Seica
 {
+    public class RobotCommand
+    {
+        public Azioni azione;
+        public Pinza pinza;
+        public Stazioni stazioni;
+        public PosizioneScheda posizioneScheda;
+    }
+
     public class Robot
     {
         #region properties
@@ -21,15 +29,26 @@ namespace Seica
         // Data buffer for incoming data.  
         private byte[] _bytes = new Byte[1024];
         private string _data { get; set; }
-        private IPEndPoint _localEndPoint;
-        private Socket _socket;
-        private List<RobotPoint> _points { get; set; }
-        private Socket _handler;
+        //endpoint per la comunicazione standard con il robot
+        private IPEndPoint _localEndPointMain;
+        //endpoint per handshake con robot per verifica comunicazione ok
+        private IPEndPoint _localEndPointComunicationCheck;
+
+        private Socket _socketMain;
+        private Socket _socketCominucationCheck;
+        private Socket _handlerMain;
+        private Socket _handlerComunication;
+
+        private RobotPoint _points { get; set; }
+
 
         //bool per definire se l'istanza è pronta a mandare i comandi al robot, 
         //ovvero solamente dopo aver scaricato tutte le quote
         public bool AreCommandsEnabled;
         public bool CommandPending;
+        public bool ComunicationOK;
+
+        public int SchedePresenti;
 
         #endregion
 
@@ -46,37 +65,179 @@ namespace Seica
 
             //Ip definito scaticamente dato che il pc non cambierà mai indirizzo
             _ipAddress = IPAddress.Parse("192.168.250.5");
-            
+
             // La porta 40000 è quella che utilizza il robot per stabile una connessione tcp,
             // Attenzione, Il progemma del robot, esegue il tentativo di connessione solamente al suo inizio
-            _localEndPoint = new IPEndPoint(_ipAddress, 40000);
-            _socket = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _localEndPointMain = new IPEndPoint(_ipAddress, 40000);
+
+            _socketMain = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _points = new RobotPoint();
+            _points.Aree = new List<Area>();
+
+            #region Punti per test
+            //_points.Aree.Add(new Area()
+            //{
+            //    Name = "Zona Carico",
+            //    Posizioni = new List<Posizione>()
+            //    {
+            //       new Posizione()
+            //       {
+            //           Name = "Prel_1_g_1_zn_1",
+            //           Punto = new Point(1.23f,2,3,4,5,6)
+            //    },
+            //       new Posizione()
+            //       {
+            //           Name = "prel_1_g_2_zn_1",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //       },
+            //       new Posizione()
+            //       {
+            //           Name = "prel_2_g_1_zn_1",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //    },
+            //       new Posizione()
+            //       {
+            //           Name = "prel_2_g_2_zn_1",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //       }
+            //    }
+            //});
+
+            //_points.Aree.Add(new Area()
+            //{
+            //    Name = "Zona Test 1",
+            //    Posizioni = new List<Posizione>()
+            //    {
+
+            //       new Posizione()
+            //       {
+            //           Name = "dep_1_g_1_zn_2",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //    },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_1_g_2_zn_2",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //       },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_2_g_1_zn_2",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //    },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_2_g_2_zn_2",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //       },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_3_g_1_zn_2",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //    },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_3_g_2_zn_2",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //       },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_4_g_1_zn_2",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //    },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_4_g_2_zn_2",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //       }
+            //    }
+            //});
+
+
+            //_points.Aree.Add(new Area()
+            //{
+            //    Name = "Zona Test 2",
+            //    Posizioni = new List<Posizione>()
+            //    {
+
+            //       new Posizione()
+            //       {
+            //           Name = "dep_1_g_1_zn_3",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //    },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_1_g_2_zn_3",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //       },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_2_g_1_zn_3",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //    },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_2_g_2_zn_3",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //       },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_3_g_1_zn_3",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //    },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_3_g_2_zn_3",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //       },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_4_g_1_zn_3",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //    },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_4_g_2_zn_3",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //       }
+            //    }
+            //});
+
+
+            //_points.Aree.Add(new Area()
+            //{
+            //    Name = "Zona Scarico",
+            //    Posizioni = new List<Posizione>()
+            //    {
+            //       new Posizione()
+            //       {
+            //           Name = "dep_1_g_1_zn_4",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //    },
+            //       new Posizione()
+            //       {
+            //           Name = "dep_1_g_2_zn_4",
+            //           Punto = new Point(1,2,3,4,5,6)
+            //       },
+            //    }
+            //});
+
+            #endregion
+
+            //XmlSerialize();
 
             //Se non avviene la deseriallizzazione correttamente, l'applicazione viene interrota
-            if(!DeserializePoints()) return;
+            if (!DeserializePoints()) return;
 
             //esegue il binding e fa partire un thread per l'invio dei punti al Robot
-            StartListeningTheRobot();
+            //StartListeningTheRobot();
+
         }
 
-        private void StartListeningTheRobot()
-        {
-            try
-            {
-                _socket.Bind(_localEndPoint);
-                _socket.Listen(10);
-                Console.WriteLine("Bindig eseguito, Numero massimo di client = 10.");
-                new Thread(RobotListener).Start();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.InnerException.Message);
-            }
-        }
+
 
         private void XmlSerialize()
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(List<RobotPoint>));
+            XmlSerializer serializer = new XmlSerializer(typeof(RobotPoint));
             using (TextWriter writer = new StreamWriter("punti.xml"))
             {
                 serializer.Serialize(writer, _points);
@@ -91,21 +252,24 @@ namespace Seica
 
                 // Create an instance of the XmlSerializer specifying type and namespace.
                 XmlSerializer serializer = new
-                XmlSerializer(typeof(List<RobotPoint>));
+                XmlSerializer(typeof(RobotPoint));
 
                 // A FileStream is needed to read the XML document.
                 FileStream fs = new FileStream("punti.xml", FileMode.Open);
                 XmlReader reader = XmlReader.Create(fs);
 
                 // Use the Deserialize method to restore the object's state.
-                _points = (List<RobotPoint>)serializer.Deserialize(reader);
+                _points = (RobotPoint)serializer.Deserialize(reader);
 
                 //Correzione punti in millimetri, solamente i primi tre parametri di ogni array
-                foreach (var arr in _points)
+                foreach (var a in _points.Aree)
                 {
-                    arr.Point[0] = arr.Point[0] / 1000;
-                    arr.Point[1] = arr.Point[1] / 1000;
-                    arr.Point[2] = arr.Point[2] / 1000;
+                    foreach (var p in a.Posizioni)
+                    {
+                        p.Punto.x = p.Punto.x / 1000;
+                        p.Punto.y = p.Punto.y / 1000;
+                        p.Punto.z = p.Punto.z / 1000;
+                    }
                 }
 
                 fs.Close();
@@ -116,46 +280,57 @@ namespace Seica
                 Console.WriteLine("Errore deserializzazione punti da foglio xml :" + ex.Message);
                 return false;
             }
-            
+
         }
 
-        private void RobotListener()
+        private void SendQuotesToRobot()
         {
 
-                // Program is suspended while waiting for an incoming connection.
-                Console.WriteLine("Attesa connessioni da clients ...");
-                _handler = _socket.Accept();
-                Console.WriteLine("Connessione Stabilita" + _handler.RemoteEndPoint.AddressFamily.ToString());
+            // Program is suspended while waiting for an incoming connection.
+            Console.WriteLine("Attesa connessioni da clients ...");
+            _handlerMain = _socketMain.Accept();
+
+            //Una volta che il client stabilisce una connessione procedo a mettermi in ascolto per un eventuale comando
+            Console.WriteLine("Connessione Stabilita" + _handlerMain.RemoteEndPoint.AddressFamily.ToString());
+            _data = null;
+
+
+
+            // An incoming connection needs to be processed.  
+            while (!AreCommandsEnabled)
+            {
+                _bytes = new byte[1024];
+
+                //rimango in ascolto per un comando    
+                int bytesRec = _handlerMain.Receive(_bytes);
+
+                //ricevuta una stringa dal client, controllo se contiene il sombolo #, che delimita 
+                //una richiesta valida mandata dal robot
                 _data = null;
+                _data += Encoding.ASCII.GetString(_bytes, 0, bytesRec);
 
-
-
-                // An incoming connection needs to be processed.  
-                while (!AreCommandsEnabled)
+                if (_data.IndexOf("#") > -1)
                 {
-                    _bytes = new byte[1024];
-                    int bytesRec = _handler.Receive(_bytes);
-                    _data = null;
-                    _data += Encoding.ASCII.GetString(_bytes, 0, bytesRec);
-                    if (_data.IndexOf("#") > -1)
+                    Console.WriteLine("Il client richiede : " + _data);
+                    switch (_data)
                     {
-                        Console.WriteLine(_data);
-                        switch (_data)
-                        {
-                            case "Quotes#":
-                                WritePointsToTheRobot(_handler);
-                                break;
-                            case "Quotes_end#":
-                                AreCommandsEnabled = true;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+                        //Richiesta del robot per le quote di lavoro
+                        case "Quotes#":
+                            WritePointsToTheRobot(_handlerMain);
+                            break;
 
+                        //Handshake finale da parte del robot per informarmi che tutti i punti sono stati ricevuti
+                        case "Quotes_end#":
+                            AreCommandsEnabled = true;
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
-            
+            }
+
+
 
         }
 
@@ -164,13 +339,11 @@ namespace Seica
             throw new NotImplementedException();
         }
 
-
-
         public void WriteCommand(Azioni azione, Pinza pinza, Stazioni stazione, PosizioneScheda pos)
         {
             CommandPending = true;
             byte[] msg = Encoding.ASCII.GetBytes($"[{(int)azione},{(int)pinza},{(int)stazione},{(int)pos}]");
-            _handler.Send(msg);
+            _handlerMain.Send(msg);
 
             _data = null;
 
@@ -178,7 +351,7 @@ namespace Seica
             while (true)
             {
                 _bytes = new byte[1024];
-                int bytesRec = _handler.Receive(_bytes);
+                int bytesRec = _handlerMain.Receive(_bytes);
                 _data = null;
                 _data += Encoding.ASCII.GetString(_bytes, 0, bytesRec);
                 if (_data.IndexOf("cmd_ok#") > -1)
@@ -194,30 +367,31 @@ namespace Seica
             }
         }
 
-
-
         private bool WritePointsToTheRobot(Socket handler)
         {
             try
             {
-                foreach (var point in _points)
+                foreach (var a in _points.Aree)
                 {
-                    byte[] msg = Encoding.ASCII.GetBytes(point.ToString());
-                    handler.Send(msg);
-
-
-                    _data = null;
-
-                    // An incoming connection needs to be processed.  
-                    while (true)
+                    foreach (var point in a.Posizioni)
                     {
-                        _bytes = new byte[1024];
-                        int bytesRec = handler.Receive(_bytes);
+                        byte[] msg = Encoding.ASCII.GetBytes(point.ToString());
+                        handler.Send(msg);
+
+
                         _data = null;
-                        _data += Encoding.ASCII.GetString(_bytes, 0, bytesRec);
-                        if (_data.IndexOf("ok#") > -1)
+
+                        // An incoming connection needs to be processed.  
+                        while (true)
                         {
-                            break;
+                            _bytes = new byte[1024];
+                            int bytesRec = handler.Receive(_bytes);
+                            _data = null;
+                            _data += Encoding.ASCII.GetString(_bytes, 0, bytesRec);
+                            if (_data.IndexOf("ok#") > -1)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
@@ -228,25 +402,6 @@ namespace Seica
             {
                 Console.WriteLine(ex.Message);
                 return false;
-            }
-        }
-
-
-
-        /// <summary>
-        /// Return the status of the connection with the robot
-        /// </summary>
-        /// <returns>true=Connected, false=Non Connesso, null= errore</returns>
-        private bool IsRobotConnected(Socket socket)
-        {
-            while (true)
-            {
-                Thread.Sleep(1000);
-                try
-                {
-                    return !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
-                }
-                catch (SocketException) { return false; }
             }
         }
     }
