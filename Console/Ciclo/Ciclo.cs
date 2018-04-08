@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
@@ -10,9 +11,12 @@ namespace Seica
 {
     public class Ciclo
     {
-        
-        public Ciclo()
+        private Robot _robot = new Robot();
+
+        public Ciclo( Robot robot)
         {
+            _robot = robot;
+
             #region Comando tutto vuoto stazione test 1
             TabellaComandi.Add(new Azione
             {
@@ -52,7 +56,7 @@ namespace Seica
                     new TableCommand()
                     {
                         Azione = AzioneTabella.Pick,
-                        Pinza = Pinza.Pinza_1,
+                        Pinza = Pinza.Pinza_2,
                         Parametro = ParametriTabella.In
                     },
                     new TableCommand()
@@ -145,41 +149,132 @@ namespace Seica
 
         private List<Scheda> _schede = new List<Scheda>();
 
-        public void Start(Robot _robot)
+        public void Start()
         {
-            if (TabellaComandi != null)
+            if (TabellaComandi == null) Console.WriteLine("La tabella dei comandi è vuota");
+
+            //Lettura stati da plc
+
+            while (true)
             {
-                Azione a = TabellaComandi.FirstOrDefault(i => i.Key.SequenceEqual(new int[] { 0, 0, 0 }));
-                CommandExecuter(a,Stazioni.ZonaTest_1, _robot);
+                Thread.Sleep(200);
+
+                if (true)//<- azione richiesta dal plc
+                {
+                    int stazione = 1; //<- lettura da plc, stazione interessata
+                    int[] stato = { 0, 0, 0 }; // <- lettura stato stazione
+
+
+                    Azione a = TabellaComandi.FirstOrDefault(i => i.Key.SequenceEqual(stato));
+
+                    if (a == null) Console.WriteLine($"Attenzione, nessun azione corrisponde alla sequenza {stato[0]}{stato[1]}{stato[2]}");
+
+                    CommandExecuter(a, (Stazioni)stazione);
+                }
             }
-            else
-            {
-                Console.WriteLine("La tabella dei comandi è vuota");
-            }
+            
         }
 
-        private void CommandExecuter(Azione a,Stazioni s ,Robot _robot)
+        private void CommandExecuter(Azione a, Stazioni s)
         {
             foreach (var c in a.Comandi)
             {
-                if(c.Azione == AzioneTabella.Pick && c.Parametro == ParametriTabella.In)
+                #region Good
+                if (c.Azione == AzioneTabella.Good && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.None)
                 {
-                    //Lettura da plc per vedere quale scheda andare a prendere
-                    throw new NotImplementedException("lettura da plc");
-
-                    PosizioneScheda PLCReading = PosizioneScheda.Carico_1; // <- funzione interrogazione plc
-
-                    if (PLCReading == PosizioneScheda.NonDefinita) return; // <- nessuna scheda pronta
-                    
-                    _robot.WriteCommand(Azioni.Prelievo, c.Pinza, Stazioni.ZonaTest_1, PosizioneScheda.Carico_1);
+                    continue;
                 }
 
-
-                if(c.Azione == AzioneTabella.Good)
+                if (c.Azione == AzioneTabella.Good && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.None)
                 {
-                    _robot.WriteCommand(Azioni.Deposito, c.Pinza, s, PosizioneScheda.ZonaTest1_1);
+                    continue;
                 }
+                #endregion
+
+                #region Pick Pinza 1
+
+                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.G)
+                {
+                    continue;
+                }
+
+                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.In)
+                {
+                    //Lettura da plc per sapere dove devo andare a prendere la scheda
+                    PosizioneScheda pos = (PosizioneScheda)1;//<-Lettura da PLC
+                    _robot.WriteCommand(Azioni.Prelievo,Pinza.Pinza_1,Stazioni.Carico, pos);
+                   // _schede.Add(new Scheda());
+                    continue;
+                }
+
+                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.R)
+                {
+                    continue;
+                }
+
+                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.W)
+                {
+                    continue;
+                }
+
+                #endregion
+
+                #region Pick Pinza 2
+
+                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.G)
+                {
+                    continue;
+                }
+
+                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.In)
+                {
+                    continue;
+                }
+
+                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.R)
+                {
+                    continue;
+                }
+
+                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.W)
+                {
+                    continue;
+                }
+
+                #endregion
+
+                #region Place
+
+                if (c.Azione == AzioneTabella.Place && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.None)
+                {
+                    continue;
+                }
+
+                if (c.Azione == AzioneTabella.Place && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.None)
+                {
+                    continue;
+                }
+
+                #endregion
+
+                #region Waste
+                if (c.Azione == AzioneTabella.Waste && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.None)
+                {
+                    continue;
+                }
+
+                if (c.Azione == AzioneTabella.Waste && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.None)
+                {
+                    continue;
+                }
+                #endregion
+
             }
+        }
+
+        private void Pick1In( )
+        {
+
         }
 
         private void XmlSerialize()

@@ -47,7 +47,6 @@ namespace Seica
         public bool AreCommandsEnabled;
         public bool CommandPending;
         public bool ComunicationOK;
-
         public int SchedePresenti;
 
         #endregion
@@ -229,11 +228,24 @@ namespace Seica
             if (!DeserializePoints()) return;
 
             //esegue il binding e fa partire un thread per l'invio dei punti al Robot
-            //StartListeningTheRobot();
+            StartListeningTheRobot();
 
         }
 
-
+        private void StartListeningTheRobot()
+        {
+            try
+            {
+                _socketMain.Bind(_localEndPointMain);
+                _socketMain.Listen(2);
+                Console.WriteLine("Bindig eseguito.");
+                new Thread(SendQuotesToRobot).Start();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
 
         private void XmlSerialize()
         {
@@ -375,7 +387,7 @@ namespace Seica
                 {
                     foreach (var point in a.Posizioni)
                     {
-                        byte[] msg = Encoding.ASCII.GetBytes(point.ToString());
+                        byte[] msg = Encoding.ASCII.GetBytes(point.Punto.ToString());
                         handler.Send(msg);
 
 
