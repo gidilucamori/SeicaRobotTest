@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scheda", "Scheda\Scheda.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ciclo", "Ciclo\Ciclo.csproj", "{6F6C8FCC-77F0-4F20-93B0-F9BC34A8B638}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compact", "Compact\Compact.csproj", "{08427E50-9510-41B3-8100-6513150E9121}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compact", "Compact\Compact.csproj", "{E2DE4FB6-8280-4E72-9F9F-06EF925D5683}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +41,10 @@ Global
 		{6F6C8FCC-77F0-4F20-93B0-F9BC34A8B638}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F6C8FCC-77F0-4F20-93B0-F9BC34A8B638}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F6C8FCC-77F0-4F20-93B0-F9BC34A8B638}.Release|Any CPU.Build.0 = Release|Any CPU
-		{08427E50-9510-41B3-8100-6513150E9121}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{08427E50-9510-41B3-8100-6513150E9121}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{08427E50-9510-41B3-8100-6513150E9121}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{08427E50-9510-41B3-8100-6513150E9121}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2DE4FB6-8280-4E72-9F9F-06EF925D5683}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2DE4FB6-8280-4E72-9F9F-06EF925D5683}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2DE4FB6-8280-4E72-9F9F-06EF925D5683}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2DE4FB6-8280-4E72-9F9F-06EF925D5683}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -12,11 +12,14 @@ namespace Seica
     public class Ciclo
     {
         private Robot _robot;
-        private Seica.
+        private Compact _compact_1;
+        private Compact _compact_2;
 
         public Ciclo(Robot robot)
         {
             _robot = robot;
+            _compact_1 = new Compact(Stazioni.Compact_1);
+            _compact_2 = new Compact(Stazioni.Compact_2);
 
             #region Comando tutto vuoto stazione test 1
             TabellaComandi.Add(new Azione
@@ -41,13 +44,13 @@ namespace Seica
                     new TableCommand()
                     {
                         Azione = AzioneTabella.Place,
-                        Pinza = Pinza.Pinza_2,
+                        Pinza = Pinza.Pinza_1,
                         Parametro = ParametriTabella.None
                     },
                     new TableCommand()
                     {
                         Azione = AzioneTabella.Place,
-                        Pinza = Pinza.Pinza_1,
+                        Pinza = Pinza.Pinza_2,
                         Parametro = ParametriTabella.None
                     },
                     new TableCommand()
@@ -65,13 +68,13 @@ namespace Seica
                     new TableCommand()
                     {
                         Azione = AzioneTabella.Place,
-                        Pinza = Pinza.Pinza_2,
+                        Pinza = Pinza.Pinza_1,
                         Parametro = ParametriTabella.None
                     },
                     new TableCommand()
                     {
                         Azione = AzioneTabella.Place,
-                        Pinza = Pinza.Pinza_1,
+                        Pinza = Pinza.Pinza_2,
                         Parametro = ParametriTabella.None
                     },
                 }
@@ -98,13 +101,13 @@ namespace Seica
                     new TableCommand()
                     {
                         Azione = AzioneTabella.Good,
-                        Pinza = Pinza.Pinza_2,
+                        Pinza = Pinza.Pinza_1,
                         Parametro = ParametriTabella.None
                     },
                     new TableCommand()
                     {
                         Azione = AzioneTabella.Good,
-                        Pinza = Pinza.Pinza_1,
+                        Pinza = Pinza.Pinza_2,
                         Parametro = ParametriTabella.None
                     },
                     new TableCommand()
@@ -122,13 +125,13 @@ namespace Seica
                     new TableCommand()
                     {
                         Azione = AzioneTabella.Good,
-                        Pinza = Pinza.Pinza_2,
+                        Pinza = Pinza.Pinza_1,
                         Parametro = ParametriTabella.None
                     },
                     new TableCommand()
                     {
                         Azione = AzioneTabella.Good,
-                        Pinza = Pinza.Pinza_1,
+                        Pinza = Pinza.Pinza_2,
                         Parametro = ParametriTabella.None
                     },
                 }
@@ -144,6 +147,7 @@ namespace Seica
         ///-Fine test postazione 2
         ///-Postazione 1 libera
         ///-Postazione 2 libera
+        ///
 
         bool caricarePostazione1 = true;
         bool caricarePostazione2 = false;
@@ -166,32 +170,68 @@ namespace Seica
 
                 if (true)//<- azione richiesta dal plc
                 {
-                    int stazione = 1; //<- lettura da plc, stazione interessata
-                    int[] stato = { 0, 0, 0 }; // <- lettura stato stazione
+                    //_robot.WriteCommand(Azioni.Prelievo, Pinza.Pinza_2, Stazioni.Carico, PosizioneSchedaForRobot.Posizione_2);
+                    //_robot.WriteCommand(Azioni.Prelievo, Pinza.Pinza_2, Stazioni.Carico, PosizioneSchedaForRobot.Posizione_2);
+                    //_robot.WriteCommand(Azioni.Deposito, Pinza.Pinza_2, Stazioni.Compact_2, PosizioneSchedaForRobot.Posizione_1);
+                    //_robot.WriteCommand(Azioni.Deposito, Pinza.Pinza_2, Stazioni.Compact_2, PosizioneSchedaForRobot.Posizione_4);
 
+                    //_robot.WriteCommand(Azioni.Prelievo, Pinza.Pinza_1, Stazioni.Home, PosizioneSchedaForRobot.Posizione_1);
+                    //    _robot.WriteCommand(Azioni.Prelievo,Pinza.Pinza_2, Stazioni.Carico, PosizioneSchedaForRobot.Posizione_2);
+                    //    _robot.WriteCommand(Azioni.Deposito, Pinza.Pinza_1, Stazioni.Compact_2, PosizioneSchedaForRobot.Posizione_3);
+                    //    _robot.WriteCommand(Azioni.Deposito, Pinza.Pinza_2, Stazioni.Compact_2, PosizioneSchedaForRobot.Posizione_4);
+
+
+                    int stazione = 1; //<- lettura da plc, stazione interessata
+                    int[] stato = { 4, 0, 0 }; // <- lettura stato stazione
+                    if (stato.SequenceEqual(new int[] { 4, 0, 0 })) _compact_2.GetTestResoultFromPLC();
 
                     Azione a = TabellaComandi.FirstOrDefault(i => i.Key.SequenceEqual(stato));
 
                     if (a == null) Console.WriteLine($"Attenzione, nessun azione corrisponde alla sequenza {stato[0]}{stato[1]}{stato[2]}");
 
-                    CommandExecuter(a, (Stazioni)stazione);
+
+                    //passare come parametro la compact giusta
+                    CommandExecuter(a,Stazioni.Compact_2, _compact_2);
                 }
             }
 
         }
 
-        private void CommandExecuter(Azione a, Stazioni s)
+        private void CommandExecuter(Azione a, Stazioni s, Compact compact = null)
         {
             foreach (var c in a.Comandi)
             {
                 #region Good
                 if (c.Azione == AzioneTabella.Good && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.None)
                 {
+                    Scheda scheda = _schede.FirstOrDefault(i =>
+                            i.PosizioniUtilizzate.Last().Stazione == Stazioni.Pinza &&
+                            i.PosizioniUtilizzate.Last().Posizione == PosizioneSchedaForRobot.Posizione_1);
+                    if (scheda == null)
+                    {
+                        Console.WriteLine("Nessuna scheda da deposiatre nella postazione di scarico, su pinza 1");
+                        return;
+                    }
+
+                    _robot.WriteCommand(Azioni.Deposito,Pinza.Pinza_1,Stazioni.Scarico,PosizioneSchedaForRobot.Posizione_1);
+                    _schede.Remove(scheda);
                     continue;
                 }
 
                 if (c.Azione == AzioneTabella.Good && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.None)
                 {
+                    Scheda scheda = _schede.FirstOrDefault(i =>
+                            i.PosizioniUtilizzate.Last().Stazione == Stazioni.Pinza &&
+                            i.PosizioniUtilizzate.Last().Posizione == PosizioneSchedaForRobot.Posizione_2);
+                    if (scheda == null)
+                    {
+                        Console.WriteLine("Nessuna scheda da deposiatre nella postazione di scarico, su pinza 1");
+                        return;
+                    }
+
+                    _robot.WriteCommand(Azioni.Deposito, Pinza.Pinza_2, Stazioni.Scarico, PosizioneSchedaForRobot.Posizione_1);
+                    _schede.Remove(scheda);
+
                     continue;
                 }
                 #endregion
@@ -200,23 +240,49 @@ namespace Seica
 
                 if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.G)
                 {
+                    //Pick di un pezzo buono da compact
+#warning check if compact is opened
+                    //throw new NotImplementedException("Check if compact is opened");
+                    int slot = compact.GiveMeTheFirstGoodToPick();
+                    if (slot == -1)
+                    {
+                        Console.WriteLine("La compact non ha nessun pezzo risultato buono");
+                        return;
+                    }
+                    _robot.WriteCommand(Azioni.Prelievo,Pinza.Pinza_1,compact.StazioneCompact,(PosizioneSchedaForRobot)slot);
+                    compact.ReleaseSlot(slot);
+                    _schede.FirstOrDefault(i =>
+                            i.PosizioniUtilizzate.Last().Stazione == compact.StazioneCompact &&
+                            i.PosizioniUtilizzate.Last().Posizione == (PosizioneSchedaForRobot)slot)
+                            .PosizioniUtilizzate.Add(new PosizioneScheda
+                            {
+                                Stazione = Stazioni.Pinza,
+                                Posizione = PosizioneSchedaForRobot.Posizione_1
+                            });
                     continue;
                 }
 
                 if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.In)
                 {
+                    if (compact.GiveMeTheFirstEmptySlot() == -1)
+                    {
+                        Console.WriteLine("Attenzione, nessuno slot della compact è vuoto");
+                        return;
+                    }
+
                     //Lettura da plc per sapere dove devo andare a prendere la scheda
                     int pos = 1;//<-Lettura da PLC
-                    //_robot.WriteCommand(Azioni.Prelievo, Pinza.Pinza_1, Stazioni.Carico, pos);
+                    _robot.WriteCommand(Azioni.Prelievo, Pinza.Pinza_1, Stazioni.Carico,(PosizioneSchedaForRobot)pos);
                     Scheda nuova = new Scheda(new PosizioneScheda
                     {
-                        Stazione = Stazione.Carico, Posizione = (PosizioniStazione)pos
+                        Stazione = Stazioni.Carico,
+                        Posizione = (PosizioneSchedaForRobot)pos
                     });
 
                     nuova.AddPosition(new PosizioneScheda
                     {
-                        Stazione = Stazione.Pinza,
-                        Posizione = PosizioniStazione.Posizione_1
+                        Stazione = Stazioni.Pinza,
+                        Posizione = PosizioneSchedaForRobot.Posizione_1
                     });
                     _schede.Add(nuova);
                     continue;
@@ -238,24 +304,49 @@ namespace Seica
 
                 if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.G)
                 {
+                    //Pick di un pezzo buono da compact
+#warning check if compact is opened
+                    //throw new NotImplementedException("Check if compact is opened");
+                    int slot = compact.GiveMeTheFirstGoodToPick();
+                    if (slot == -1)
+                    {
+                        Console.WriteLine("La compact non ha nessun pezzo risultato buono");
+                        return;
+                    }
+                    _robot.WriteCommand(Azioni.Prelievo,Pinza.Pinza_2,compact.StazioneCompact,(PosizioneSchedaForRobot)slot);
+                    compact.ReleaseSlot(slot);
+                    _schede.FirstOrDefault(i =>
+                            i.PosizioniUtilizzate.Last().Stazione == compact.StazioneCompact &&
+                            i.PosizioniUtilizzate.Last().Posizione == (PosizioneSchedaForRobot)slot)
+                            .PosizioniUtilizzate.Add(new PosizioneScheda
+                            {
+                                Stazione = Stazioni.Pinza,
+                                Posizione = PosizioneSchedaForRobot.Posizione_2
+                            });
                     continue;
                 }
 
                 if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.In)
                 {
+                    if (compact.GiveMeTheFirstEmptySlot() == -1)
+                    {
+                        Console.WriteLine("Attenzione, nessuno slot della compact è vuoto");
+                        return;
+                    }
+
                     //Lettura da plc per sapere dove devo andare a prendere la scheda
                     int pos = 2;//<-Lettura da PLC
-                    //_robot.WriteCommand(Azioni.Prelievo, Pinza.Pinza_1, Stazioni.Carico, pos);
+                    _robot.WriteCommand(Azioni.Prelievo, Pinza.Pinza_2, Stazioni.Carico,(PosizioneSchedaForRobot)pos);
                     Scheda nuova = new Scheda(new PosizioneScheda
                     {
-                        Stazione = Stazione.Carico,
-                        Posizione = (PosizioniStazione)pos
+                        Stazione = Stazioni.Carico,
+                        Posizione = (PosizioneSchedaForRobot)pos
                     });
 
                     nuova.AddPosition(new PosizioneScheda
                     {
-                        Stazione = Stazione.Pinza,
-                        Posizione = PosizioniStazione.Posizione_2
+                        Stazione = Stazioni.Pinza,
+                        Posizione = PosizioneSchedaForRobot.Posizione_2
                     });
                     _schede.Add(nuova);
                     continue;
@@ -277,12 +368,66 @@ namespace Seica
 
                 if (c.Azione == AzioneTabella.Place && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.None)
                 {
+
+                    //check se ci sono schede sulla pinza 1 
+                    if (_schede.FirstOrDefault(i =>
+                            i.PosizioniUtilizzate.Last().Stazione == Stazioni.Pinza &&
+                            i.PosizioniUtilizzate.Last().Posizione == PosizioneSchedaForRobot.Posizione_1)
+                        == null)
+                    {
+                        Console.WriteLine("Attenzione, Non sono presenti schede da posizionare sulla pinza 1");
+                        return;
+                    }
+
+
+                    int slot = compact.GiveMeTheFirstEmptySlot();
+                    _robot.WriteCommand(Azioni.Deposito, Pinza.Pinza_1, s, (PosizioneSchedaForRobot)slot);
+
+                    //informare la posizione della compact che è occupata
+                    compact.AddToEmptySlot(slot);
+                    //informare la scheda della sua nuova posizione
+
+                    Scheda scheda = _schede.FirstOrDefault(
+                        i => i.PosizioniUtilizzate.Last().Stazione == Stazioni.Pinza &&
+                        i.PosizioniUtilizzate.Last().Posizione == PosizioneSchedaForRobot.Posizione_1);
+
+                    scheda.PosizioniUtilizzate.Add(new PosizioneScheda()
+                    {
+                        Stazione = compact.StazioneCompact,
+                        Posizione = (PosizioneSchedaForRobot)slot
+                    });
                     continue;
                 }
 
                 if (c.Azione == AzioneTabella.Place && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.None)
                 {
-                    _robot.WriteCommand();
+
+                    //check se ci sono schede sulla pinza 2 
+                    if (_schede.FirstOrDefault(i =>
+                            i.PosizioniUtilizzate.Last().Stazione == Stazioni.Pinza &&
+                            i.PosizioniUtilizzate.Last().Posizione == PosizioneSchedaForRobot.Posizione_2)
+                        == null)
+                    {
+                        Console.WriteLine("Attenzione, Non sono presenti schede da posizionare sulla pinza 2");
+                        return;
+                    }
+
+                    int slot = compact.GiveMeTheFirstEmptySlot();
+                    _robot.WriteCommand(Azioni.Deposito, Pinza.Pinza_2, s, (PosizioneSchedaForRobot)slot);
+
+                    //informare la posizione della compact che è occupata
+                    compact.AddToEmptySlot(slot);
+                    //informare la scheda della sua nuova posizione
+
+                    Scheda scheda = _schede.FirstOrDefault(
+                        i => i.PosizioniUtilizzate.Last().Stazione == Stazioni.Pinza &&
+                        i.PosizioniUtilizzate.Last().Posizione == PosizioneSchedaForRobot.Posizione_2);
+
+                    scheda.PosizioniUtilizzate.Add(new PosizioneScheda()
+                    {
+                        Stazione = compact.StazioneCompact,
+                        Posizione = (PosizioneSchedaForRobot)slot
+                    });
                     continue;
                 }
 

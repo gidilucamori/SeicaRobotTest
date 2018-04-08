@@ -253,7 +253,7 @@ namespace Test
         public static void Main()
         {
             _robot = new Robot();
-            //while (!_robot.AreCommandsEnabled);
+            while (!_robot.AreCommandsEnabled);
             Console.WriteLine("Punti scritti.");
             Ciclo c = new Ciclo(_robot);
             c.Start();

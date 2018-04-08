@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{08427E50-9510-41B3-8100-6513150E9121}</ProjectGuid>
+    <ProjectGuid>{E2DE4FB6-8280-4E72-9F9F-06EF925D5683}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Compact</RootNamespace>
@@ -42,6 +42,16 @@
   <ItemGroup>
     <Compile Include="Compact.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Robot\Robot.csproj">
+      <Project>{2b52ea96-cde5-4722-a80d-6dccc6694a6a}</Project>
+      <Name>Robot</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Scheda\Scheda.csproj">
+      <Project>{532f7e16-8308-4bcc-9bf9-f0cd4c0e54f6}</Project>
+      <Name>Scheda</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

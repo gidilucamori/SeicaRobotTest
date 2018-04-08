@@ -48,26 +48,9 @@ namespace Seica
 
     }
 
-    public enum PosizioniStazione
-    {
-        Posizione_1 = 1,
-        Posizione_2 = 2,
-        Posizione_3 = 3,
-        Posizione_4 = 4
-    }
-
-    public enum Stazione
-    {
-        Carico = 1,
-        Stazione_1 = 2,
-        Stazione_2 = 3,
-        Scarico = 4,
-        Pinza = 5,
-    }
-
     public class PosizioneScheda
     {
-        public PosizioniStazione Posizione { get; set; }
-        public Stazione Stazione { get; set; }
+        public PosizioneSchedaForRobot Posizione { get; set; }
+        public Stazioni Stazione { get; set; }
     }
 }

@@ -44,6 +44,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Compact\Compact.csproj">
+      <Project>{e2de4fb6-8280-4e72-9f9f-06ef925d5683}</Project>
+      <Name>Compact</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Robot\Robot.csproj">
       <Project>{2b52ea96-cde5-4722-a80d-6dccc6694a6a}</Project>
       <Name>Robot</Name>
