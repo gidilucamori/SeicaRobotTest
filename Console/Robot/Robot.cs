@@ -18,7 +18,7 @@ namespace Seica
         public Azioni azione;
         public Pinza pinza;
         public Stazioni stazioni;
-        public PosizioneScheda posizioneScheda;
+        public PosizioneSchedaForRobot posizioneScheda;
     }
 
     public class Robot
@@ -351,7 +351,7 @@ namespace Seica
             throw new NotImplementedException();
         }
 
-        public void WriteCommand(Azioni azione, Pinza pinza, Stazioni stazione, PosizioneScheda pos)
+        public void WriteCommand(Azioni azione, Pinza pinza, Stazioni stazione, PosizioneSchedaForRobot pos)
         {
             CommandPending = true;
             byte[] msg = Encoding.ASCII.GetBytes($"[{(int)azione},{(int)pinza},{(int)stazione},{(int)pos}]");

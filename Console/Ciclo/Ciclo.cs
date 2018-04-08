@@ -11,15 +11,18 @@ namespace Seica
 {
     public class Ciclo
     {
-        private Robot _robot = new Robot();
+        private Robot _robot;
+        private Seica.
 
-        public Ciclo( Robot robot)
+        public Ciclo(Robot robot)
         {
             _robot = robot;
 
             #region Comando tutto vuoto stazione test 1
             TabellaComandi.Add(new Azione
             {
+                Comment = "Postazione test completamente vuota." +
+                "Verranno prese 4 schede dalla stazione di carico, e posate all interno della macchina di test.",
                 Key = new int[] { 0, 0, 0 },
                 Comandi = new List<TableCommand>()
                 {
@@ -75,6 +78,8 @@ namespace Seica
             });
             TabellaComandi.Add(new Azione
             {
+                Comment = "La macchina di test ha completato il suo lavoro, e restituisce un informazione di 'Tutti Ok'," +
+                "ovvero tutte le schede possono essere prese e depositate nella zona di scarico Good.",
                 Key = new int[] { 4, 0, 0 },
                 Comandi = new List<TableCommand>()
                 {
@@ -172,7 +177,7 @@ namespace Seica
                     CommandExecuter(a, (Stazioni)stazione);
                 }
             }
-            
+
         }
 
         private void CommandExecuter(Azione a, Stazioni s)
@@ -201,9 +206,19 @@ namespace Seica
                 if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.In)
                 {
                     //Lettura da plc per sapere dove devo andare a prendere la scheda
-                    PosizioneScheda pos = (PosizioneScheda)1;//<-Lettura da PLC
-                    _robot.WriteCommand(Azioni.Prelievo,Pinza.Pinza_1,Stazioni.Carico, pos);
-                   // _schede.Add(new Scheda());
+                    int pos = 1;//<-Lettura da PLC
+                    //_robot.WriteCommand(Azioni.Prelievo, Pinza.Pinza_1, Stazioni.Carico, pos);
+                    Scheda nuova = new Scheda(new PosizioneScheda
+                    {
+                        Stazione = Stazione.Carico, Posizione = (PosizioniStazione)pos
+                    });
+
+                    nuova.AddPosition(new PosizioneScheda
+                    {
+                        Stazione = Stazione.Pinza,
+                        Posizione = PosizioniStazione.Posizione_1
+                    });
+                    _schede.Add(nuova);
                     continue;
                 }
 
@@ -228,15 +243,30 @@ namespace Seica
 
                 if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.In)
                 {
+                    //Lettura da plc per sapere dove devo andare a prendere la scheda
+                    int pos = 2;//<-Lettura da PLC
+                    //_robot.WriteCommand(Azioni.Prelievo, Pinza.Pinza_1, Stazioni.Carico, pos);
+                    Scheda nuova = new Scheda(new PosizioneScheda
+                    {
+                        Stazione = Stazione.Carico,
+                        Posizione = (PosizioniStazione)pos
+                    });
+
+                    nuova.AddPosition(new PosizioneScheda
+                    {
+                        Stazione = Stazione.Pinza,
+                        Posizione = PosizioniStazione.Posizione_2
+                    });
+                    _schede.Add(nuova);
                     continue;
                 }
 
-                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.R)
+                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.R)
                 {
                     continue;
                 }
 
-                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_1 && c.Parametro == ParametriTabella.W)
+                if (c.Azione == AzioneTabella.Pick && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.W)
                 {
                     continue;
                 }
@@ -252,6 +282,7 @@ namespace Seica
 
                 if (c.Azione == AzioneTabella.Place && c.Pinza == Pinza.Pinza_2 && c.Parametro == ParametriTabella.None)
                 {
+                    _robot.WriteCommand();
                     continue;
                 }
 
@@ -272,7 +303,7 @@ namespace Seica
             }
         }
 
-        private void Pick1In( )
+        private void Pick1In()
         {
 
         }
@@ -291,6 +322,7 @@ namespace Seica
 
     public class Azione
     {
+        public string Comment { get; set; }
         public int[] Key { get; set; }
         public List<TableCommand> Comandi { get; set; }
     }

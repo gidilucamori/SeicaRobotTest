@@ -21,7 +21,7 @@ namespace WpfTest
             _robot = new Robot();
         }
 
-        private void executeCommand(Azioni azione, Pinza pinza, Stazioni stazione, PosizioneScheda posizione)
+        private void executeCommand(Azioni azione, Pinza pinza, Stazioni stazione, PosizioneSchedaForRobot posizione)
         {
             if (_robot != null && _robot.AreCommandsEnabled && !_robot.CommandPending)
             {
@@ -39,22 +39,22 @@ namespace WpfTest
 
         private void pc1p1(object sender, RoutedEventArgs e)
         {
-            executeCommand(Azioni.Prelievo, Pinza.Pinza_2, Stazioni.Carico, PosizioneScheda.Carico_2);
+            executeCommand(Azioni.Prelievo, Pinza.Pinza_2, Stazioni.Carico, PosizioneSchedaForRobot.Carico_2);
         }
 
         private void pc2p2(object sender, RoutedEventArgs e)
         {
-            executeCommand(Azioni.Prelievo, Pinza.Pinza_2, Stazioni.Carico, PosizioneScheda.Carico_2);
+            executeCommand(Azioni.Prelievo, Pinza.Pinza_2, Stazioni.Carico, PosizioneSchedaForRobot.Carico_2);
         }
 
         private void dp1(object sender, RoutedEventArgs e)
         {
-            executeCommand(Azioni.Deposito, Pinza.Pinza_1, Stazioni.Scarico, PosizioneScheda.Scarico);
+            executeCommand(Azioni.Deposito, Pinza.Pinza_1, Stazioni.Scarico, PosizioneSchedaForRobot.Scarico);
         }
 
         private void dp2(object sender, RoutedEventArgs e)
         {
-            executeCommand(Azioni.Deposito, Pinza.Pinza_2, Stazioni.Scarico, PosizioneScheda.Scarico);   
+            executeCommand(Azioni.Deposito, Pinza.Pinza_2, Stazioni.Scarico, PosizioneSchedaForRobot.Scarico);   
         }
     }
 }

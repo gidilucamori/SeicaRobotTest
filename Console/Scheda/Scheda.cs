@@ -8,17 +8,33 @@ namespace Seica
 {
     public class Scheda
     {
-        public List<PosizioniStazione> PosizioniUtilizzate;
-        public StazioniTest Stazione { get; }
+        //Lista delle varie posizioni visitate dalla scheda
+        public List<PosizioneScheda> PosizioniUtilizzate;
+
+        //Contiene l'informazione del luogo da dove è stata caricata la scheda dalla stazione di carico
+        public PosizioneScheda PosizioneDiPresaCarico;
+
+        public int Id { get; set; }
+
+        // Contatore schede per debug
+        public static int IdCounter { get; set; }
+
+        //Viene settato quando la scheda non supera due test su tre, per definire definitivamente lo stato
+        //di waste
         public bool IsWaste;
 
-        public Scheda(StazioniTest stazione)
+        public int NumeroTestFalliti { get; set; }
+
+        public Scheda(PosizioneScheda posizioneCarico)
         {
-            PosizioniUtilizzate = new List<PosizioniStazione>();
-            Stazione = stazione;
+            PosizioniUtilizzate = new List<PosizioneScheda>();
+            PosizioneDiPresaCarico = posizioneCarico;
+            //Assegno l'attuale valore alla scheda e incremento il contatore
+            Id = IdCounter++;
+            if (IdCounter == 255) IdCounter = 0;
         }
 
-        public bool AddPosition(PosizioniStazione nuovaPosizione)
+        public bool AddPosition(PosizioneScheda nuovaPosizione)
         {
             if (PosizioniUtilizzate.Contains(nuovaPosizione))
             {
@@ -30,7 +46,6 @@ namespace Seica
             return true;
         }
 
-
     }
 
     public enum PosizioniStazione
@@ -41,9 +56,18 @@ namespace Seica
         Posizione_4 = 4
     }
 
-    public enum StazioniTest
+    public enum Stazione
     {
-        Stazione_1 = 1,
-        Stazione_2 = 2
+        Carico = 1,
+        Stazione_1 = 2,
+        Stazione_2 = 3,
+        Scarico = 4,
+        Pinza = 5,
+    }
+
+    public class PosizioneScheda
+    {
+        public PosizioniStazione Posizione { get; set; }
+        public Stazione Stazione { get; set; }
     }
 }

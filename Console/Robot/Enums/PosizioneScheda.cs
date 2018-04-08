@@ -1,6 +1,6 @@
 ﻿namespace Seica
 {
-    public enum PosizioneScheda
+    public enum PosizioneSchedaForRobot
     {
         Carico_1 = 1,
         Carico_2 = 2,
@@ -17,6 +17,7 @@
         Pinza_2 =2,
         NonDefinita = -1
     }
+
 }
 
 

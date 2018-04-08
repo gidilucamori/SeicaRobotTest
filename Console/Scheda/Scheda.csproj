@@ -43,5 +43,11 @@
     <Compile Include="Scheda.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Robot\Robot.csproj">
+      <Project>{2b52ea96-cde5-4722-a80d-6dccc6694a6a}</Project>
+      <Name>Robot</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

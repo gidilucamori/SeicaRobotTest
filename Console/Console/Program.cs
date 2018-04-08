@@ -249,15 +249,15 @@ namespace Test
         //}
 
 
-        //private static Robot _robot;
-        //public static void Main()
-        //{
-        //    _robot = new Robot();
-        //    //while (!_robot.AreCommandsEnabled);
-        //    Console.WriteLine("Punti scritti.");
-        //    Ciclo c = new Ciclo(_robot);
-        //    c.Start();
-        //}
+        private static Robot _robot;
+        public static void Main()
+        {
+            _robot = new Robot();
+            //while (!_robot.AreCommandsEnabled);
+            Console.WriteLine("Punti scritti.");
+            Ciclo c = new Ciclo(_robot);
+            c.Start();
+        }
     }
 }
 
